@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, RefreshCw, Users } from "lucide-react";
+import { Check, RefreshCw, Trash2, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -26,6 +32,8 @@ export default function Sidebar({
   const [groups, setGroups] = useState<TelegramGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmOpenId, setConfirmOpenId] = useState<string | null>(null);
 
   const fetchGroups = async () => {
     setLoading(true);
@@ -62,6 +70,29 @@ export default function Sidebar({
       onSelectionChange([]);
     } else {
       onSelectionChange(groups.map((g) => g.id.toString()));
+    }
+  };
+
+  const deleteGroup = async (groupId: string) => {
+    setDeletingId(groupId);
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.error || "Guruhni o'chirishda xatolik");
+        return;
+      }
+      setGroups((prev) => prev.filter((g) => g.id.toString() !== groupId));
+      if (selectedGroups.includes(groupId)) {
+        onSelectionChange(selectedGroups.filter((id) => id !== groupId));
+      }
+    } catch {
+      setError("Serverga ulanib bo'lmadi");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -146,6 +177,60 @@ export default function Sidebar({
                     )}
                   </div>
                   <span className="truncate">{group.title}</span>
+                  <Popover
+                    open={confirmOpenId === group.id.toString()}
+                    onOpenChange={(open) =>
+                      setConfirmOpenId(
+                        open ? group.id.toString() : null
+                      )
+                    }
+                  >
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={(e) => e.stopPropagation()}
+                        disabled={deletingId === group.id.toString()}
+                        className="ml-auto p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                        title="Guruhni o'chirish"
+                        aria-label="Guruhni o'chirish"
+                      >
+                        <Trash2
+                          className={`w-3.5 h-3.5 ${
+                            deletingId === group.id.toString()
+                              ? "opacity-60"
+                              : ""
+                          }`}
+                        />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-48"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p className="text-sm font-medium">
+                        Guruhni o'chiraymi?
+                      </p>
+                      <div className="mt-3 flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setConfirmOpenId(null)}
+                        >
+                          Yo'q
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            setConfirmOpenId(null);
+                            deleteGroup(group.id.toString());
+                          }}
+                        >
+                          Ha
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </li>
               );
             })}

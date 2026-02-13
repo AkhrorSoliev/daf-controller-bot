@@ -207,14 +207,14 @@ export default function TiptapEditor({
         {/* Undo/Redo */}
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
-          isDisabled={!editor.can().undo()}
+          isDisabled={!editor.can().chain().focus().undo().run()}
           title="Bekor qilish (Ctrl+Z)"
         >
           <Undo className="w-4 h-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().redo().run()}
-          isDisabled={!editor.can().redo()}
+          isDisabled={!editor.can().chain().focus().redo().run()}
           title="Qaytarish (Ctrl+Y)"
         >
           <Redo className="w-4 h-4" />
