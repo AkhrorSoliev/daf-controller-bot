@@ -2,6 +2,12 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Set API URL before running the app:
+
+```bash
+NEXT_PUBLIC_API_URL=https://daf-controller-bot-production.up.railway.app
+```
+
 First, run the development server:
 
 ```bash

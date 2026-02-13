@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Check, RefreshCw, Users } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://daf-controller-bot-production.up.railway.app";
 
 interface TelegramGroup {
   id: number;
